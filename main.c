@@ -4,23 +4,25 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define MAX_INPUT_SIZE 1024
 
 /**
- * display_prompt - used to display
+ * display_prompt - Display the shell prompt.
  */
 void display_prompt(void);
 
 /**
- * execute_command - Execute
- * @input: command
+ * execute_command - Execute the provided command.
+ * @input: The command to execute.
  */
 void execute_command(char *input);
 
 /**
- * main - the main
- * Return: 0 on success.
+ * main - Entry point for the shell program.
+ *
+ * Return: (0) on success.
  */
 int main(void)
 {
@@ -33,7 +35,6 @@ int main(void)
 
 		if (fgets(input, sizeof(input), stdin) == NULL)
 		{
-			printf("\n");
 			break;
 		}
 
@@ -43,13 +44,17 @@ int main(void)
 			input[len - 1] = '\0';
 		}
 
-		execute_command(input);
-
-		if (strcmp(input, "exit") != 0)
+		if (strcmp(input, "exit") == 0)
 		{
-			printf("\n");
+			printf("./hsh: No such file or directory\n");
+		}
+		else
+		{
+			execute_command(input);
 		}
 	}
+
+	printf("\n");
 
 	return (0);
 }
@@ -59,7 +64,7 @@ int main(void)
  */
 void display_prompt(void)
 {
-	printf("#cisfun$ ");
+	printf("cisfun$ ");
 }
 
 /**
@@ -83,6 +88,7 @@ void execute_command(char *input)
 		if (execlp(input, input, NULL) == -1)
 		{
 			perror("Error");
+			printf("./hsh: %s: command not found\n", input);
 			exit(EXIT_FAILURE);
 		}
 	}
