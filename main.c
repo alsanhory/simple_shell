@@ -8,24 +8,28 @@
 #define MAX_INPUT_SIZE 1024
 
 /**
- * main - the main entry
- * Return: 0 on sucess
+ * display_prompt - used to display
  */
+void display_prompt(void);
 
+/**
+ * execute_command - Execute
+ * @input: command
+ */
+void execute_command(char *input);
+
+/**
+ * main - the main
+ * Return: 0 on success.
+ */
 int main(void)
 {
-	
 	char input[MAX_INPUT_SIZE];
-	char *args[MAX_INPUT_SIZE / 2 + 1];
-	int i = 0;
 	size_t len;
-	int status;
-	char *token;
-	pid_t pid;
 
 	while (1)
 	{
-		printf("#cisfun$ ");
+		display_prompt();
 
 		if (fgets(input, sizeof(input), stdin) == NULL)
 		{
@@ -39,45 +43,52 @@ int main(void)
 			input[len - 1] = '\0';
 		}
 
-		token = strtok(input, " ");
-		i = 0;
+		execute_command(input);
 
-		while (token != NULL)
-	       	{
-			args[i++] = token;
-			token = strtok(NULL, " ");
-		}
-		args[i] = NULL;
-		pid = fork();
-
-		if (pid == -1)
+		if (strcmp(input, "exit") != 0)
 		{
-			perror("fork");
-			exit(EXIT_FAILURE);
-		}
-		else if (pid == 0)
-		{
-
-			if (execvp(args[0], args) == -1)
-			{
-				perror(args[0]);
-				exit(EXIT_FAILURE);
-			}
-		}
-		else
-		{
-
-
-			waitpid(pid, &status, 0);
-
-			if (WIFEXITED(status))
-			{
-
-				printf("\n");
-			}
+			printf("\n");
 		}
 	}
 
 	return (0);
+}
+
+/**
+ * display_prompt - Display the shell prompt.
+ */
+void display_prompt(void)
+{
+	printf("#cisfun$ ");
+}
+
+/**
+ * execute_command - Execute the provided command.
+ * @input: The command to execute.
+ */
+void execute_command(char *input)
+{
+	pid_t pid;
+	int status;
+
+	pid = fork();
+
+	if (pid == -1)
+	{
+		perror("fork");
+		exit(EXIT_FAILURE);
+	}
+	else if (pid == 0)
+	{
+		if (execlp(input, input, NULL) == -1)
+		{
+			perror("Error");
+			exit(EXIT_FAILURE);
+		}
+	}
+	else
+	{
+		waitpid(pid, &status, 0);
+	}
 }
 
