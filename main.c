@@ -17,6 +17,11 @@ int main(void)
 	
 	char input[MAX_INPUT_SIZE];
 	char *args[MAX_INPUT_SIZE / 2 + 1];
+	int i = 0;
+	size_t len;
+	int status;
+	char *token;
+	pid_t pid;
 
 	while (1)
 	{
@@ -28,14 +33,14 @@ int main(void)
 			break;
 		}
 
-		size_t len = strlen(input);
+		len = strlen(input);
 		if (len > 0 && input[len - 1] == '\n')
 		{
 			input[len - 1] = '\0';
 		}
 
-		char *token = strtok(input, " ");
-		int i = 0;
+		token = strtok(input, " ");
+		i = 0;
 
 		while (token != NULL)
 	       	{
@@ -43,7 +48,7 @@ int main(void)
 			token = strtok(NULL, " ");
 		}
 		args[i] = NULL;
-		pid_t pid = fork();
+		pid = fork();
 
 		if (pid == -1)
 		{
@@ -62,7 +67,7 @@ int main(void)
 		else
 		{
 
-			int status;
+
 			waitpid(pid, &status, 0);
 
 			if (WIFEXITED(status))
