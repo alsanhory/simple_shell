@@ -1,100 +1,83 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <string.h>
-#include <stdbool.h>
 
 #define MAX_INPUT_SIZE 1024
+#define PROMPT "#cisfun$ "
 
-/**
- * display_prompt - Display the shell prompt.
- */
 void display_prompt(void);
 
 /**
- * execute_command - Execute the provided command.
- * @input: The command to execute.
- */
-void execute_command(char *input);
-
-/**
- * main - Entry point for the shell program.
+ * main - Entry point for the simple shell program
  *
- * Return: (0) on success.
+ * Return: Always 0
  */
 int main(void)
 {
-	char input[MAX_INPUT_SIZE];
-	size_t len;
+	char *token;
+	size_t len = 0;
+	int chr;
+	pid_t pid;
 
 	while (1)
 	{
 		display_prompt();
 
-		if (fgets(input, sizeof(input), stdin) == NULL)
+		chr = getline(&token, &len, stdin);
+
+		if (chr == -1)
 		{
-			break;
+			perror("Error reading input");
+			exit(EXIT_FAILURE);
 		}
 
-		len = strlen(input);
-		if (len > 0 && input[len - 1] == '\n')
+		if (token[chr - 1] == '\n')
 		{
-			input[len - 1] = '\0';
+			token[chr - 1] = '\0';
 		}
 
-		if (strcmp(input, "exit") == 0)
+		if (feof(stdin))
 		{
-			printf("./hsh: No such file or directory\n");
+			printf("\n");
+			free(token);
+			exit(EXIT_SUCCESS);
+		}
+
+		pid = fork();
+
+		if (pid == -1)
+		{
+			perror("Fork Failed");
+			exit(EXIT_FAILURE);
+		}
+		else if (pid == 0)
+		{
+			char *args[2];
+
+			args[0] = token;
+			args[1] = NULL;
+
+			execve(token, args, __environ);
+			perror("Execution failed");
+			exit(EXIT_FAILURE);
 		}
 		else
 		{
-			execute_command(input);
+			wait(NULL);
 		}
 	}
-
-	printf("\n");
 
 	return (0);
 }
 
 /**
- * display_prompt - Display the shell prompt.
+ * display_prompt - Displays the shell prompt
  */
 void display_prompt(void)
 {
-	printf("cisfun$ ");
-}
-
-/**
- * execute_command - Execute the provided command.
- * @input: The command to execute.
- */
-void execute_command(char *input)
-{
-	pid_t pid;
-	int status;
-
-	pid = fork();
-
-	if (pid == -1)
-	{
-		perror("fork");
-		exit(EXIT_FAILURE);
-	}
-	else if (pid == 0)
-	{
-		if (execlp(input, input, NULL) == -1)
-		{
-			perror("Error");
-			printf("./hsh: %s: command not found\n", input);
-			exit(EXIT_FAILURE);
-		}
-	}
-	else
-	{
-		waitpid(pid, &status, 0);
-	}
+	write(STDOUT_FILENO, PROMPT, strlen(PROMPT));
 }
 

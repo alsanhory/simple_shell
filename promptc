@@ -1,0 +1,15 @@
+#include<stdio.h>
+#include<stdlib.h>
+int main(void)
+{
+	size_t n = 10;
+	char *buf;
+
+	buf = malloc(sizeof(char) * 1);
+	printf("& ");
+	getline(&buf, &n, stdin);
+	printf("enter text %s\n",buf);
+	printf("Buffer size %ld\n", n);
+	free(buf);
+	return (0);
+}
